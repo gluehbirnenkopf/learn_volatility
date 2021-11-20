@@ -1,0 +1,18 @@
+[
+  {
+    "name": "Apple",
+    "signal": "AAPL",
+    "capital": {
+      "quantity": 1,
+      "buy_price": 114.09
+    }
+  },
+  {
+    "name": "Tesla",
+    "signal": "TSLA",
+    "capital": {
+      "quantity": 1,
+      "buy_price": 428.93
+    }
+  }
+]
