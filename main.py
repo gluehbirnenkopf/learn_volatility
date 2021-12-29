@@ -20,17 +20,32 @@ class TickerData:
             self.influxdbClient = InfluxDBClient(
                 url="http://localhost:8086",
                 token=os.getenv('INFLUX_TOKEN'),
-                org="ccc"
+                org="moon"
             )
             logging.info("Initialize Influx DB successfull")
 
-    def writeStockPriceInflux(self, name, price):
-        p = Point("stock").tag("name", name).field("price", price).time(datetime.utcnow(),WritePrecision.MS)
+    def writeStockPriceInflux(self, name, price, quantity):
+        volume = price * quantity
+        p = Point("stock").tag("name", name).field("volume", volume).time(datetime.utcnow(),WritePrecision.MS)
         write_api = self.influxdbClient.write_api(write_options=SYNCHRONOUS)
 
         # write using point structure
         logging.info("db write")
-        write_api.write(bucket="ccc", record=p)
+        write_api.write(bucket="marketdata", record=p)
+
+    def calculateReturn(self, price, buy_price):
+        percentage=(price-buy_price)/buy_price
+        return round(percentage*100,2)
+
+    def getLastStockQoute(self, signal):
+        # initialize ticker for a stock
+        ticker = yf.Ticker(signal)
+        # get history of that stock
+        history = ticker.history()
+        # get historical data including last price (Close) and parse only this as last price
+        last_quote = (history.tail(1)['Close'].iloc[0])
+        return last_quote
+
 
     def run(self):
         while True:
@@ -39,42 +54,25 @@ class TickerData:
                 data = json.load(data_file)
 
                 for action in data:
-                    # initialize ticker for a stock
-                    ticker = yf.Ticker(action['signal'])
-                    # get history of that stock
-                    history = ticker.history()
-                    # get historical data including last price (Close) and parse only this as last price
-                    last_quote = (history.tail(1)['Close'].iloc[0])
-                    json_body = [{
-                        "measurement": "share_price",
-                        "tags": {
-                            "name": action['name']
-                        },
-                        "fields": {
-                            "price": last_quote
-                        }
-                    }, {
-                        "measurement": "capital",
-                        "tags": {
-                            "name": action['name'],
-                        },
-                        "fields": {
-                            "quantity": action['capital']['quantity'],
-                            "buy_price":
-                                action['capital']['buy_price']
-                        }
-                    }]
+                    stockSignal=action['signal']
+                    stockQuantity=action['capital']['quantity']
+                    stockName=action['name']
+                    stockBuyPrice=action['capital']['buy_price']
+                    stockCurrentPrice=self.getLastStockQoute(stockSignal)
 
-                    logging.info("Writing data:"+action['name']+":"+str(last_quote))
+                    stockReturn=self.calculateReturn(stockCurrentPrice,stockBuyPrice)
+                    print(stockReturn)
 
                     if "ENABLE_INFLUX" in os.environ:
-                        self.writeStockPriceInflux(action['name'], last_quote)
+                        self.writeStockPriceInflux(stockName, stockCurrentPrice, stockQuantity)
 
-                    time.sleep(20)
+                    time.sleep(5)
 
 
 if __name__ == "__main__":
 
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
+    logging.info("Logger initialized")
+    print("tet")
     dataSource = TickerData()
     dataSource.run()

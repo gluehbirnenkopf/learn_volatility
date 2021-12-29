@@ -3,7 +3,7 @@
     "name": "Apple",
     "signal": "AAPL",
     "capital": {
-      "quantity": 1,
+      "quantity": 5,
       "buy_price": 114.09
     }
   },
