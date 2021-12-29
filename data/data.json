@@ -8,6 +8,14 @@
     }
   },
   {
+    "name": "Bitcoin",
+    "signal": "BTC-USD",
+    "capital": {
+      "quantity": 5,
+      "buy_price": 20000.09
+    }
+  },
+  {
     "name": "Tesla",
     "signal": "TSLA",
     "capital": {
