@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Cloudflare",
+    "isin": "US18915M1071",
+    "capital": {
+      "quantity": 12,
+      "buy_price": 83.05
+    }
+  },
+  {
+    "name": "Bitcoin",
+    "signal": "BTC-USD",
+    "capital": {
+      "quantity": 1,
+      "buy_price": 20000.09
+    }
+  },
+  {
+    "name": "Datadog",
+    "isin": "US23804L1035",
+    "capital": {
+      "quantity": 7,
+      "buy_price": 120.02
+    }
+  },
+  {
+    "name": "Coinbase",
+    "isin": "US19260Q1076",
+    "capital": {
+      "quantity": 5,
+      "buy_price": 158.20
+    }
+  },
+  {
+    "name": "WisomTree Emerging Cloud ETF",
+    "isin": "IE00BJGWQN72",
+    "capital": {
+      "quantity": 27,
+      "buy_price": 37.32
+    }
+  },
+  {
+    "name": "Okta",
+    "isin": "US6792951054",
+    "capital": {
+      "quantity": 5,
+      "buy_price": 184.242
+    }
+  }
+]

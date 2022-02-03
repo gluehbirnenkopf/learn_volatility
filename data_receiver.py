@@ -2,15 +2,15 @@ import json
 import time
 from datetime import datetime
 import os
+import urllib.request
 
 # logging libs
 import logging
 import sys
-
 import yfinance as yf
+
 from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import WritePrecision, SYNCHRONOUS, Point
-
 
 class TickerData:
     def __init__(self):
@@ -37,7 +37,12 @@ class TickerData:
         percentage=(price-buy_price)/buy_price
         return round(percentage*100,2)
 
-    def getLastStockQoute(self, signal):
+    def getInstrumentPriceIsin(self, isin):
+        with urllib.request.urlopen("https://component-api.wertpapiere.ing.de/api/v1/components/instrumentheader/{}".format(isin)) as url:
+            data = json.loads(url.read().decode())
+        return data['price']
+
+    def getInstrumentPriceSignal(self, signal):
         # initialize ticker for a stock
         ticker = yf.Ticker(signal)
         # get history of that stock
@@ -46,22 +51,29 @@ class TickerData:
         last_quote = (history.tail(1)['Close'].iloc[0])
         return last_quote
 
-
     def run(self):
         while True:
-            with open('data/data.json') as data_file:
-                logging.info("loading data file...")
-                data = json.load(data_file)
+            with open('data/portfolio.json') as data_file:
+                logging.info("loading isin file...")
+                portfolio = json.load(data_file)
 
-                for action in data:
-                    stockSignal=action['signal']
-                    stockQuantity=action['capital']['quantity']
-                    stockName=action['name']
-                    stockBuyPrice=action['capital']['buy_price']
-                    stockCurrentPrice=self.getLastStockQoute(stockSignal)
+                for security in portfolio:
+                    # READ INPUT
+                    stockSignal=security.get('signal')
+                    stockISIN=security.get('isin')
+                    stockQuantity=security['capital']['quantity']
+                    stockName=security['name']
+                    stockBuyPrice=security['capital']['buy_price']
 
+                    # QUERY APIs
+                    if stockSignal is not None:
+                        stockCurrentPrice=self.getInstrumentPriceSignal(stockSignal)
+                    else:
+                        stockCurrentPrice=self.getInstrumentPriceIsin(stockISIN)
+
+                    # Calculate Metrics
                     stockReturn=self.calculateReturn(stockCurrentPrice,stockBuyPrice)
-                    print(stockReturn)
+                    print(stockName + ":" + str(stockCurrentPrice) + "," + str(stockReturn))
 
                     if "ENABLE_INFLUX" in os.environ:
                         self.writeStockPriceInflux(stockName, stockCurrentPrice, stockQuantity)
@@ -73,6 +85,5 @@ if __name__ == "__main__":
 
     logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     logging.info("Logger initialized")
-    print("tet")
     dataSource = TickerData()
     dataSource.run()
