@@ -1,0 +1,33 @@
+version: "3.9"
+services:
+  db:
+    image: influxdb:2.0
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=local
+      - DOCKER_INFLUXDB_INIT_PASSWORD=local123!
+      - DOCKER_INFLUXDB_INIT_ORG=moon
+      - DOCKER_INFLUXDB_INIT_BUCKET=marketdata
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=9283hdsiuh9843JHGGH9382lLPO
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://localhost:8086/health"]
+        interval: 5s
+        timeout: 10s
+        retries: 5
+        start_period: 20s
+  crawler:
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+    links:
+      - "db:influxdb"
+    environment:
+      - LOOP=True
+      - DB_URL=http://influxdb:8086
+      - DB_TOKEN=9283hdsiuh9843JHGGH9382lLPO
+      - DB_ORG=moon
+    depends_on:
+    - "db"
