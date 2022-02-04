@@ -4,7 +4,7 @@
     "isin": "US18915M1071",
     "capital": {
       "quantity": 12,
-      "buy_price": 83.05
+      "buy_price": 73.05
     }
   },
   {
@@ -20,7 +20,7 @@
     "isin": "US23804L1035",
     "capital": {
       "quantity": 7,
-      "buy_price": 120.02
+      "buy_price": 94.02
     }
   },
   {
@@ -28,7 +28,7 @@
     "isin": "US19260Q1076",
     "capital": {
       "quantity": 5,
-      "buy_price": 158.20
+      "buy_price": 155.20
     }
   },
   {
@@ -44,7 +44,7 @@
     "isin": "US6792951054",
     "capital": {
       "quantity": 5,
-      "buy_price": 184.242
+      "buy_price": 174.242
     }
   }
 ]
